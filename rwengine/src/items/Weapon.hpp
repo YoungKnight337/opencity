@@ -6,7 +6,8 @@ class CharacterObject;
 class GameObject;
 struct WeaponData;
 
-enum class ScanType {
+enum class ScanType 
+{
     /** Instant-hit ray weapons */
     HitScan,
     /** Area of effect attack */
@@ -16,7 +17,8 @@ enum class ScanType {
 /**
  * @brief simple object for performing weapon checks against the world
  */
-struct WeaponScan {
+struct WeaponScan 
+{
     const ScanType type;
 
     float damage;
@@ -48,13 +50,15 @@ struct WeaponScan {
             , center(start)
             , end(end)
             , weapon(weapon)
-            , source(source) {
+            , source(source) 
+    {
     }
 
     bool doesDamage(GameObject* target) const;
 };
 
-namespace Weapon {
+namespace Weapon 
+{
 void fireProjectile(WeaponData* weapon, CharacterObject* character, float force);
 void fireHitscan(WeaponData *weapon, CharacterObject* character);
 void meleeHit(WeaponData *weapon, CharacterObject* character);

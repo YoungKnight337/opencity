@@ -22,7 +22,8 @@ class GameWorld;
  * Contains handle to the world, and other useful properties like water level
  * tracking used to make tunnels work.
  */
-class GameObject {
+class GameObject 
+{
     GameObjectID objectID = 0;
 
     BaseModelInfo* modelinfo_;
@@ -34,7 +35,8 @@ class GameObject {
     static const ClumpPtr NullClump;
 
 protected:
-    void changeModelInfo(BaseModelInfo* next) {
+    void changeModelInfo(BaseModelInfo* next) 
+    {
         modelinfo_ = next;
     }
 
@@ -60,46 +62,55 @@ public:
 
     GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot,
                BaseModelInfo* modelinfo)
-        : modelinfo_(modelinfo), position(pos), rotation(rot), engine(engine) {
-        if (modelinfo_) {
+        : modelinfo_(modelinfo), position(pos), rotation(rot), engine(engine) 
+    {
+        if (modelinfo_) 
+        {
             modelinfo_->addReference();
         }
     }
 
     virtual ~GameObject();
 
-    GameObjectID getGameObjectID() const {
+    GameObjectID getGameObjectID() const 
+    {
         return objectID;
     }
     /**
      * Do not call this, use GameWorld::insertObject
      */
-    void setGameObjectID(GameObjectID id) {
+    void setGameObjectID(GameObjectID id) 
+    {
         objectID = id;
     }
 
-    int getScriptObjectID() const {
+    int getScriptObjectID() const 
+    {
         return getGameObjectID();
     }
 
     template <class T>
-    T* getModelInfo() const {
+    T* getModelInfo() const 
+    {
         return static_cast<T*>(modelinfo_);
     }
 
-    const Model& getModel() const {
+    const Model& getModel() const 
+    {
         return model_;
     }
 
-     const AtomicPtr& getAtomic() const {
+     const AtomicPtr& getAtomic() const 
+     {
         if (auto atomic = std::get_if<AtomicPtr>(&model_))
         {
             return *atomic;
         }
         return NullAtomic;
-    }
+     }
 
-    const ClumpPtr& getClump() const {
+    const ClumpPtr& getClump() const 
+    {
         if (auto clump = std::get_if<ClumpPtr>(&model_))
         {
             return *clump;
@@ -107,18 +118,21 @@ public:
         return NullClump;
     }
 
-    void setModel(const AtomicPtr& model) {
+    void setModel(const AtomicPtr& model) 
+    {
         model_ = model;
     }
 
-    void setModel(const ClumpPtr& model) {
+    void setModel(const ClumpPtr& model) 
+    {
         model_ = model;
     }
 
     /**
      * @brief Enumeration of possible object types.
      */
-    enum Type {
+    enum Type 
+    {
         Instance,
         Character,
         Vehicle,
@@ -132,17 +146,20 @@ public:
      * @brief determines what type of object this is.
      * @return one of Type
      */
-    virtual Type type() const {
+    virtual Type type() const 
+    {
         return Unknown;
     }
 
     virtual void setPosition(const glm::vec3& pos);
 
-    const glm::vec3& getPosition() const {
+    const glm::vec3& getPosition() const 
+    {
         return position;
     }
 
-    const glm::quat& getRotation() const {
+    const glm::quat& getRotation() const 
+    {
         return rotation;
     }
     virtual void setRotation(const glm::quat& orientation);
@@ -157,19 +174,23 @@ public:
      * @brief getCenterOffset Returns the offset from center of mass to base of model
      * This function should be overwritten by a derived class
      */
-    virtual glm::vec3 getCenterOffset() {
+    virtual glm::vec3 getCenterOffset() 
+    {
         return glm::vec3(0.f, 0.f, 1.f);
     }
 
     /**
      * @brief applyOffset Applies the offset from getCenterOffset to the object
      */
-    void applyOffset() {
+    void applyOffset() 
+    {
          setPosition(getPosition() + getCenterOffset());
     }
 
-    struct DamageInfo {
-        enum class DamageType {
+    struct DamageInfo 
+    {
+        enum class DamageType 
+        {
             Explosion, Burning, Bullet, Physics, Melee
         };
 
@@ -204,22 +225,26 @@ public:
               type(type), impulse(impulse) {}
     };
 
-    virtual bool takeDamage(const DamageInfo& damage) {
+    virtual bool takeDamage(const DamageInfo& damage) 
+    {
         RW_UNUSED(damage);
         return false;
     }
 
-    virtual bool isAnimationFixed() const {
+    virtual bool isAnimationFixed() const 
+    {
         return true;
     }
 
-    virtual bool isInWater() const {
+    virtual bool isInWater() const 
+    {
         return inWater;
     }
 
     virtual void tick(float dt) = 0;
 
-    enum ObjectLifetime {
+    enum ObjectLifetime 
+    {
         /// lifetime has not been set
         UnknownLifetime,
         /// Generic background pedestrians
@@ -230,17 +255,21 @@ public:
         PlayerLifetime
     };
 
-    void setLifetime(ObjectLifetime ol) {
+    void setLifetime(ObjectLifetime ol) 
+    {
         lifetime = ol;
     }
 
-    ObjectLifetime getLifetime() const {
+    ObjectLifetime getLifetime() const 
+    {
         return lifetime;
     }
 
     /// Returns true if the object is not referenced by a script or player
-    virtual bool canBeRemoved() const {
-        switch (lifetime) {
+    virtual bool canBeRemoved() const 
+    {
+        switch (lifetime) 
+        {
             case MissionLifetime:
             case PlayerLifetime:
                 return false;

@@ -32,13 +32,15 @@ constexpr float kVehicleMaxExitVelocity = 0.15f;
 /**
  * A raycaster that will ignore the body of the vehicle when casting rays
  */
-class VehicleRaycaster final : public btVehicleRaycaster {
+class VehicleRaycaster final : public btVehicleRaycaster 
+{
     btDynamicsWorld* _world;
     VehicleObject* _vehicle;
 
 public:
     VehicleRaycaster(VehicleObject* vehicle, btDynamicsWorld* world)
-        : _world(world), _vehicle(vehicle) {
+        : _world(world), _vehicle(vehicle)
+    {
     }
 
     void* castRay(const btVector3& from, const btVector3& to,
@@ -66,13 +68,16 @@ public:
     }
 };
 
-class VehiclePartMotionState final : public btMotionState {
+class VehiclePartMotionState final : public btMotionState 
+{
 public:
     VehiclePartMotionState(VehicleObject* object, VehicleObject::Part* part)
-        : m_object(object), m_part(part) {
+        : m_object(object), m_part(part) 
+    {
     }
 
-    void getWorldTransform(btTransform& tform) const override {
+    void getWorldTransform(btTransform& tform) const override 
+    {
         const auto& p = m_part->dummy->getDefaultTranslation();
         const auto& o = glm::toQuat(m_part->dummy->getDefaultRotation());
         tform.setOrigin(btVector3(p.x, p.y, p.z));
@@ -81,7 +86,8 @@ public:
             m_object->collision->getBulletBody()->getWorldTransform() * tform;
     }
 
-    void setWorldTransform(const btTransform& tform) override {
+    void setWorldTransform(const btTransform& tform) override 
+    {
         auto inv = glm::inverse(m_object->getRotation());
         const auto& rot = tform.getRotation();
         auto r2 = inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
@@ -102,7 +108,8 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     , info(info)
     , colourPrimary(prim)
     , colourSecondary(sec)
-    , collision(new CollisionInstance) {
+    , collision(new CollisionInstance) 
+{
     collision->createPhysicsBody(this, modelinfo->getCollision(), nullptr,
                                  &info->handling);
     collision->getBulletBody()->forceActivationState(DISABLE_DEACTIVATION);
@@ -136,7 +143,8 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     float kC = 0.5f;
     float kR = 0.6f;
 
-    for (size_t w = 0; w < info->wheels.size(); ++w) {
+    for (size_t w = 0; w < info->wheels.size(); ++w) 
+    {
         auto restLength = travel;
         auto heightOffset = info->handling.suspensionUpperLimit;
         btVector3 connection(info->wheels[w].position.x,
@@ -177,33 +185,41 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     setupModel();
 }
 
-VehicleObject::~VehicleObject() {
+VehicleObject::~VehicleObject() 
+{
     ejectAll();
 
     engine->dynamicsWorld->removeAction(physVehicle.get());
 
-    for (auto& p : dynamicParts) {
+    for (auto& p : dynamicParts) 
+    {
         destroyObjectHinge(&p.second);
     }
 }
 
-void VehicleObject::setupModel() {
+void VehicleObject::setupModel() 
+{
     const auto vehicleInfo = getModelInfo<VehicleModelInfo>();
     const auto isBoat = (vehicleInfo->vehicletype_ == VehicleModelInfo::BOAT);
     const std::string baseName = isBoat ? "boat" : "chassis";
     const auto dummy = getClump()->findFrame("chassis_dummy");
 
-    for (const auto& atomic : getClump()->getAtomics()) {
+    for (const auto& atomic : getClump()->getAtomics()) 
+    {
         auto frame = atomic->getFrame().get();
         const auto& name = frame->getName();
-        if (name == baseName + "_vlo") {
+        if (name == baseName + "_vlo") 
+        {
             chassislow_ = atomic.get();
         }
-        if (name == baseName + "_hi") {
+        if (name == baseName + "_hi") 
+        {
             chassishigh_ = atomic.get();
         }
-        if (name.find("extra") == 0) {
-            if (name.size() == 5) {
+        if (name.find("extra") == 0) 
+        {
+            if (name.size() == 5) 
+            {
                 continue;
             }
 
@@ -213,7 +229,8 @@ void VehicleObject::setupModel() {
         }
     }
 
-    if (!dummy) {
+    if (!dummy) 
+    {
         return;
     }
 
@@ -225,55 +242,68 @@ void VehicleObject::setupModel() {
     }
 
     auto compRules = vehicleInfo->componentrules_;
-    auto numComponents = [](int rule) {
+    auto numComponents = [](int rule) 
+    {
         if ((rule & 0xFFF) == 0xFFF) return 0;
         if ((rule & 0xFF0) == 0xFF0) return 1;
         if ((rule & 0xF00) == 0xF00) return 2;
         return 3;
     };
-    while (compRules != 0) {
+    
+    while (compRules != 0) 
+    {
         auto rule = (compRules & 0xFFFF);
         auto type = static_cast<ComponentRuleType>(rule >> 12);
         compRules >>= 16;
 
         long int result = -1;
-        switch (type) {
+        switch (type) 
+        {
             case ComponentRuleType::Any:
-            case ComponentRuleType::RainOnly: {
+            case ComponentRuleType::RainOnly: 
+            {
                 auto max = numComponents(rule) - 1;
                 auto i = engine->getRandomNumber(0, max);
                 result = (rule >> (4 * i)) & 0xF;
-            } break;
-            case ComponentRuleType::Optional: {
+            } 
+            break;
+            case ComponentRuleType::Optional: 
+            {
                 auto max = numComponents(rule) - 1;
                 auto i = engine->getRandomNumber(-1, max);
-                if (i == -1) {
+                if (i == -1) 
+                {
                     break;
                 }
                 result = (rule >> (4 * i)) & 0xF;
-            } break;
+            } 
+            break;
             case ComponentRuleType::Random:
                 /// @todo this should fail to enable the 6th component
                 result = engine->getRandomNumber(0, 5);
                 break;
         }
 
-        if (type == ComponentRuleType::RainOnly && !engine->isRaining()) {
+        if (type == ComponentRuleType::RainOnly && !engine->isRaining()) 
+        {
             continue;
         }
 
-        if (result >= 0) {
+        if (result >= 0) 
+        {
             setExtraEnabled(size_t(result), true);
         }
     }
 }
 
-void VehicleObject::setPosition(const glm::vec3& pos) {
+void VehicleObject::setPosition(const glm::vec3& pos) 
+{
     GameObject::setPosition(pos);
     getClump()->getFrame()->setTranslation(pos);
     if (collision->getBulletBody()) {
         auto bodyOrigin = btVector3(position.x, position.y, position.z);
-        for (auto& part : dynamicParts) {
+        for (auto& part : dynamicParts) 
+        {
             if (part.second.body == nullptr) continue;
             auto body = part.second.body.get();
             auto rel = body->getWorldTransform().getOrigin() - bodyOrigin;
@@ -287,7 +317,8 @@ void VehicleObject::setPosition(const glm::vec3& pos) {
     }
 }
 
-glm::vec3 VehicleObject::getCenterOffset() {
+glm::vec3 VehicleObject::getCenterOffset() 
+{
     // Calculate the offset from the center to the base of the vehicle
     btVector3 aabbMin;
     btVector3 aabbMax;
@@ -298,9 +329,11 @@ glm::vec3 VehicleObject::getCenterOffset() {
     return glm::vec3(0.f, 0.f, z_offset);
 }
 
-void VehicleObject::setRotation(const glm::quat& orientation) {
+void VehicleObject::setRotation(const glm::quat& orientation) 
+{
     getClump()->getFrame()->setRotation(glm::mat3_cast(orientation));
-    if (collision->getBulletBody()) {
+    if (collision->getBulletBody()) 
+    {
         auto t = collision->getBulletBody()->getWorldTransform();
         t.setRotation(btQuaternion(orientation.x, orientation.y, orientation.z,
                                    orientation.w));
@@ -309,26 +342,31 @@ void VehicleObject::setRotation(const glm::quat& orientation) {
     GameObject::setRotation(orientation);
 }
 
-void VehicleObject::setExtraEnabled(size_t extra, bool enabled) {
+void VehicleObject::setExtraEnabled(size_t extra, bool enabled) 
+{
     auto atomic = extras_.at(extra);
-    if (!atomic) {
+    if (!atomic) 
+    {
         return;
     }
 
     atomic->setFlag(Atomic::ATOMIC_RENDER, enabled);
 }
 
-void VehicleObject::tick(float dt) {
+void VehicleObject::tick(float dt) 
+{
     RW_UNUSED(dt);
     // Moved to tickPhysics
 }
 
-void VehicleObject::tickPhysics(float dt) {
+void VehicleObject::tickPhysics(float dt) 
+{
     RW_UNUSED(dt);
 
     static constexpr float steeringWeight = 1.f/0.35f;
 
-    if (physVehicle) {
+    if (physVehicle) 
+    {
         // todo: a real engine function
         float velFac = info->handling.maxVelocity;
         float velocity = collision->getBulletBody()->getLinearVelocity().length();
@@ -347,10 +385,12 @@ void VehicleObject::tickPhysics(float dt) {
         unsigned int count = 0;
 
         // Get the global vehicle steering value (for front wheels only).
-        for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
+        for (int w = 0; w < physVehicle->getNumWheels(); ++w) 
+        {
             btWheelInfo& wi = physVehicle->getWheelInfo(w);
 
-            if (wi.m_bIsFrontWheel) {
+            if (wi.m_bIsFrontWheel) 
+            {
                 steerValue += physVehicle->getSteeringValue(w);
                 count++;
             }
@@ -377,7 +417,8 @@ void VehicleObject::tickPhysics(float dt) {
         if (std::abs(steerValue) > steerLimit / 8.f && velocity > velocityMax / 3.f)
             engineForce /= 1.f + std::abs(steerValue) / (4.f * steerLimit);
 
-        if (velocity > velocityMax) {
+        if (velocity > velocityMax) 
+        {
             btVector3 v = collision->getBulletBody()->getLinearVelocity().normalized();
 
             velocity = velocityMax;
@@ -386,9 +427,12 @@ void VehicleObject::tickPhysics(float dt) {
             collision->getBulletBody()->setLinearVelocity(v);
         }
 
-        if (handbrake) {
+        if (handbrake) 
+        {
             brakeF = 5.f;
-        } else if (throttle < 0.f && velocityForward > velocityMax / 8.f) {
+        } 
+        else if (throttle < 0.f && velocityForward > velocityMax / 8.f) 
+        {
             engineForce = 0.f;
             brakeF = 2.f * std::min(1.f + kM, 4.f);
         }
@@ -400,13 +444,15 @@ void VehicleObject::tickPhysics(float dt) {
 
             collision->getBulletBody()->setLinearVelocity(v);
 
-            for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
+            for (int w = 0; w < physVehicle->getNumWheels(); ++w) 
+            {
                 btWheelInfo& wi = physVehicle->getWheelInfo(w);
                 wi.m_rotation = wheelsRotation[w];
             }
         }
 
-        for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
+        for (int w = 0; w < physVehicle->getNumWheels(); ++w) 
+        {
             btWheelInfo& wi = physVehicle->getWheelInfo(w);
 
             wheelsRotation[w] = wi.m_rotation;
@@ -415,7 +461,8 @@ void VehicleObject::tickPhysics(float dt) {
                 (info->handling.driveType == VehicleHandlingInfo::Forward &&
                  wi.m_bIsFrontWheel) ||
                 (info->handling.driveType == VehicleHandlingInfo::Rear &&
-                 !wi.m_bIsFrontWheel)) {
+                 !wi.m_bIsFrontWheel)) 
+            {
                 physVehicle->applyEngineForce(engineForce, w);
             }
 
@@ -425,7 +472,8 @@ void VehicleObject::tickPhysics(float dt) {
                                     : 1.f - info->handling.brakeBias);
             physVehicle->setBrake(brakeReal * brakeF, w);
 
-            if (wi.m_bIsFrontWheel) {
+            if (wi.m_bIsFrontWheel) 
+            {
                 float currentVal = physVehicle->getSteeringValue(w);
                 float currentSign = std::copysign(1.0f, currentVal);
                 float newVal;
@@ -433,12 +481,15 @@ void VehicleObject::tickPhysics(float dt) {
                 if (std::abs(steerAngle) < 0.001f) {   // no steering?
                     newVal = std::max(0.0f,std::abs(currentVal) -
                                       steeringWeight * dt) * currentSign;
-                } else {
+                } 
+                else 
+                {
                     newVal = currentVal + steerAngle * dt * steeringWeight;
 
                     float limit = glm::radians(info->handling.steeringLock);
 
-                    if (std::abs(newVal) > limit) {
+                    if (std::abs(newVal) > limit) 
+                    {
                         newVal = limit * currentSign;
                     }
                 }
@@ -448,15 +499,20 @@ void VehicleObject::tickPhysics(float dt) {
         }
 
         // Update passenger positions
-        for (auto& [seatId, objectPtr] : seatOccupants) {
+        for (auto& [seatId, objectPtr] : seatOccupants) 
+        {
             auto character = static_cast<CharacterObject*>(objectPtr);
 
             glm::vec3 passPosition{};
-            if (character->isEnteringOrExitingVehicle()) {
+            if (character->isEnteringOrExitingVehicle()) 
+            {
                 passPosition = getSeatEntryPositionWorld(seatId);
-            } else {
+            } 
+            else 
+            {
                 passPosition = getPosition();
-                if (seatId < info->seats.size()) {
+                if (seatId < info->seats.size()) 
+                {
                     passPosition +=
                         getRotation() * (info->seats[seatId].offset);
                 }
@@ -464,8 +520,10 @@ void VehicleObject::tickPhysics(float dt) {
             objectPtr->updateTransform(passPosition, getRotation());
         }
 
-        if (getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
-            if (isInWater()) {
+        if (getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) 
+        {
+            if (isInWater()) 
+            {
                 float sign = std::copysign(1.0f, steerAngle);
                 float steer =
                     std::min(glm::radians(info->handling.steeringLock),
@@ -522,21 +580,26 @@ void VehicleObject::tickPhysics(float dt) {
                 // If the vehicle is currently underwater
                 if (vH <= wH) {
                     // and was not underwater here in the last tick
-                    if (_lastHeight >= wH) {
+                    if (_lastHeight >= wH) 
+                    {
                         // we are for real, underwater
                         inWater = true;
                     }
-                } else {
+                } 
+                else 
+                {
                     // The water is beneath us
                     inWater = false;
                 }
-            } else {
+            } else 
+            {
                 inWater = false;
             }
         }
 
         auto isBoat = getVehicle()->vehicletype_ == VehicleModelInfo::BOAT;
-        if (inWater) {
+        if (inWater) 
+        {
             // Ensure that vehicles don't fall asleep at the top of a wave.
             if (!collision->getBulletBody()->isActive()) {
                 collision->getBulletBody()->activate(true);
@@ -547,7 +610,8 @@ void VehicleObject::tickPhysics(float dt) {
             float oZ =
                 -bbZ / 2.f + (bbZ * (info->handling.percentSubmerged / 120.f));
 
-            if (isBoat) {
+            if (isBoat) 
+            {
                 oZ = 0.f;
             } else {
                 // Damper motion
@@ -617,87 +681,108 @@ void VehicleObject::tickPhysics(float dt) {
     }
 }
 
-bool VehicleObject::isFlipped() const {
+bool VehicleObject::isFlipped() const 
+{
     auto forward = getRotation() * glm::vec3(0.f, 0.f, 1.f);
     return forward.z <= -0.97f;
 }
 
-bool VehicleObject::isUpright() const {
+bool VehicleObject::isUpright() const 
+{
     auto forward = getRotation() * glm::vec3(0.f, 0.f, 1.f);
     return forward.z >= 0.f;
 }
 
-float VehicleObject::getVelocity() const {
-    if (physVehicle) {
+float VehicleObject::getVelocity() const 
+{
+    if (physVehicle) 
+    {
         return (physVehicle->getCurrentSpeedKmHour() * 1000.f) / (60.f * 60.f);
     }
     return 0.f;
 }
 
-bool VehicleObject::canBeRemoved() const {
+bool VehicleObject::canBeRemoved() const 
+{
     return GameObject::canBeRemoved() &&
            all_of(seatOccupants.begin(), seatOccupants.end(),
                   [](const auto& p) { return p.second->canBeRemoved(); });
 }
 
-bool VehicleObject::isWrecked() const {
+bool VehicleObject::isWrecked() const 
+{
     return health < 250.f;
 }
 
-void VehicleObject::setHealth(float h) {
+void VehicleObject::setHealth(float h) 
+{
     health = h;
 }
 
-float VehicleObject::getHealth() const {
+float VehicleObject::getHealth() const 
+{
     return health;
 }
 
-void VehicleObject::setSteeringAngle(float a, bool force) {
+void VehicleObject::setSteeringAngle(float a, bool force) 
+{
     steerAngle = a;
 
-    if (force && physVehicle) {
-        for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
+    if (force && physVehicle) 
+    {
+        for (int w = 0; w < physVehicle->getNumWheels(); ++w) 
+        {
             btWheelInfo& wi = physVehicle->getWheelInfo(w);
             
-            if (wi.m_bIsFrontWheel) {
+            if (wi.m_bIsFrontWheel) 
+            {
                 physVehicle->setSteeringValue(a, w);
             }
         }
     }
 }
 
-float VehicleObject::getSteeringAngle() const {
+float VehicleObject::getSteeringAngle() const 
+{
     return steerAngle;
 }
 
-void VehicleObject::setThrottle(float t) {
+void VehicleObject::setThrottle(float t) 
+{
     throttle = t;
 }
 
-float VehicleObject::getThrottle() const {
+float VehicleObject::getThrottle() const 
+{
     return throttle;
 }
 
-void VehicleObject::setBraking(float b) {
+void VehicleObject::setBraking(float b) 
+{
     brake = b;
 }
 
-float VehicleObject::getBraking() const {
+float VehicleObject::getBraking() const 
+{
     return brake;
 }
 
-void VehicleObject::setHandbraking(bool hb) {
+void VehicleObject::setHandbraking(bool hb) 
+{
     handbrake = hb;
 }
 
-bool VehicleObject::getHandbraking() const {
+bool VehicleObject::getHandbraking() const 
+{
     return handbrake;
 }
 
-void VehicleObject::ejectAll() {
-    for (std::map<size_t, GameObject*>::iterator it = seatOccupants.begin();
-         it != seatOccupants.end();) {
-        if (it->second->type() == GameObject::Character) {
+void VehicleObject::ejectAll() 
+{
+    for (std::map<size_t, GameObject*>::iterator it = seatOccupants.begin(); it != seatOccupants.end();) 
+    {
+        if (it->second->type() == GameObject::Character) 
+        {
             CharacterObject* c = static_cast<CharacterObject*>(it->second);
             c->setCurrentVehicle(nullptr, 0);
             c->setPosition(getPosition());
@@ -706,46 +791,59 @@ void VehicleObject::ejectAll() {
     }
 }
 
-GameObject* VehicleObject::getOccupant(size_t seat) const {
+GameObject* VehicleObject::getOccupant(size_t seat) const 
+{
     auto it = seatOccupants.find(seat);
-    if (it != seatOccupants.end()) {
+    if (it != seatOccupants.end()) 
+    {
         return it->second;
     }
     return nullptr;
 }
 
-void VehicleObject::setOccupant(size_t seat, GameObject* occupant) {
+void VehicleObject::setOccupant(size_t seat, GameObject* occupant)
+{
     auto it = seatOccupants.find(seat);
-    if (occupant == nullptr) {
-        if (it != seatOccupants.end()) {
+    if (occupant == nullptr) 
+    {
+        if (it != seatOccupants.end()) 
+        {
             seatOccupants.erase(it);
         }
-    } else {
+    } 
+    else 
+    {
         seatOccupants[seat] = occupant;
     }
 }
 
-bool VehicleObject::canOccupantExit() const {
+bool VehicleObject::canOccupantExit() const 
+{
     return getVelocity() <= kVehicleMaxExitVelocity;
 }
 
-bool VehicleObject::isOccupantDriver(size_t seat) const {
+bool VehicleObject::isOccupantDriver(size_t seat) const 
+{
     // This isn't true for all vehicles, but it'll do until we figure it out
     return seat == 0;
 }
 
-CharacterObject* VehicleObject::getDriver() const {
+CharacterObject* VehicleObject::getDriver() const 
+{
     return static_cast<CharacterObject*>(getOccupant(0));
 }
 
-VehicleObject::Part* VehicleObject::getSeatEntryDoor(size_t seat) {
+VehicleObject::Part* VehicleObject::getSeatEntryDoor(size_t seat) 
+{
     auto pos = info->seats[seat].offset + glm::vec3(0.f, 0.5f, 0.f);
     Part* nearestDoor = nullptr;
     float d = std::numeric_limits<float>::max();
-    for (auto& p : dynamicParts) {
+    for (auto& p : dynamicParts) 
+    {
         float partDist =
             glm::distance(p.second.dummy->getDefaultTranslation(), pos);
-        if (partDist < d && p.second.dummy->getName().substr(0, 5) == "door_") {
+        if (partDist < d && p.second.dummy->getName().substr(0, 5) == "door_") 
+        {
             d = partDist;
             nearestDoor = &p.second;
         }
@@ -758,13 +856,15 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
 
     const float frameDamageThreshold = 1500.f;
 
-    if (dmg.impulse >= frameDamageThreshold) {
+    if (dmg.impulse >= frameDamageThreshold) 
+    {
         auto dpoint = dmg.damageLocation;
         dpoint -= getPosition();
         dpoint = glm::inverse(getRotation()) * dpoint;
 
         // Set any parts within range to damaged state.
-        for (auto& d : dynamicParts) {
+        for (auto& d : dynamicParts) 
+        {
             auto p = &d.second;
 
             if (p->normal == nullptr) continue;
@@ -773,7 +873,8 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
             float damageradius = 0.1f;
             auto center = glm::vec3(p->dummy->getWorldTransform()[3]);
             float td = glm::distance(center, dpoint);
-            if (td < damageradius * 1.2f) {
+            if (td < damageradius * 1.2f) 
+            {
                 setPartState(p, DAM);
             }
             /// @todo determine when doors etc. should un-latch
@@ -786,26 +887,33 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
 }
 
 void VehicleObject::setPartState(VehicleObject::Part* part,
-                                 VehicleObject::FrameState state) {
-    if (state == VehicleObject::OK) {
+                                 VehicleObject::FrameState state) 
+{
+    if (state == VehicleObject::OK) 
+    {
         if (part->normal) part->normal->setFlag(Atomic::ATOMIC_RENDER, true);
         if (part->damaged) part->damaged->setFlag(Atomic::ATOMIC_RENDER, false);
-    } else if (state == VehicleObject::DAM) {
+    } 
+    else if (state == VehicleObject::DAM) 
+    {
         if (part->normal) part->normal->setFlag(Atomic::ATOMIC_RENDER, false);
         if (part->damaged) part->damaged->setFlag(Atomic::ATOMIC_RENDER, true);
     }
 }
 
-void VehicleObject::applyWaterFloat(const glm::vec3& relPt) {
+void VehicleObject::applyWaterFloat(const glm::vec3& relPt) 
+{
     auto ws = getPosition() + relPt;
     auto wi = engine->data->getWaterIndexAt(ws);
-    if (wi != NO_WATER_INDEX) {
+    if (wi != NO_WATER_INDEX) 
+    {
         float h = engine->data->waterHeights[wi];
 
         // Calculate wave height
         h += engine->data->getWaveHeightAt(ws);
 
-        if (ws.z <= h) {
+        if (ws.z <= h) 
+        {
             float x = (h - ws.z);
             float F = WATER_BUOYANCY_K * x +
                       -WATER_BUOYANCY_C *
@@ -816,10 +924,14 @@ void VehicleObject::applyWaterFloat(const glm::vec3& relPt) {
     }
 }
 
-void VehicleObject::setPartLocked(VehicleObject::Part* part, bool locked) {
-    if (part->body == nullptr && !locked) {
+void VehicleObject::setPartLocked(VehicleObject::Part* part, bool locked) 
+{
+    if (part->body == nullptr && !locked) 
+    {
         createObjectHinge(part);
-    } else if (part->body != nullptr && locked) {
+    } 
+    else if (part->body != nullptr && locked) 
+    {
         destroyObjectHinge(part);
 
         // Restore default bone transform
@@ -827,31 +939,40 @@ void VehicleObject::setPartLocked(VehicleObject::Part* part, bool locked) {
     }
 }
 
-void VehicleObject::setPartTarget(VehicleObject::Part* part, bool enable,
-                                  float target) {
-    if (enable) {
-        if (part->body == nullptr) {
+void VehicleObject::setPartTarget(VehicleObject::Part* part, bool enable, float target) 
+{
+    if (enable) 
+    {
+        if (part->body == nullptr) 
+        {
             setPartLocked(part, false);
-        } else {
+        } 
+        else 
+        {
             part->body->activate(true);
         }
         part->targetAngle = target;
         part->moveToAngle = true;
-    } else {
+    } 
+    else 
+    {
         part->targetAngle = target;
         part->moveToAngle = false;
     }
 }
 
-VehicleObject::Part* VehicleObject::getPart(const std::string& name) {
+VehicleObject::Part* VehicleObject::getPart(const std::string& name) 
+{
     auto f = dynamicParts.find(name);
-    if (f != dynamicParts.end()) {
+    if (f != dynamicParts.end()) 
+    {
         return &f->second;
     }
     return nullptr;
 }
 
-void VehicleObject::registerPart(ModelFrame* mf) {
+void VehicleObject::registerPart(ModelFrame* mf) 
+{
     auto dummynameend = mf->getName().find("_dummy");
     RW_CHECK(dummynameend != std::string::npos,
              "Can't create part from non-dummy");
@@ -866,11 +987,14 @@ void VehicleObject::registerPart(ModelFrame* mf) {
 
     // Find the Atomics for the part
     Atomic *normal = nullptr, *damage = nullptr;
-    for (const auto& atomic : getClump()->getAtomics()) {
-        if (atomic->getFrame().get() == normalframe) {
+    for (const auto& atomic : getClump()->getAtomics()) 
+    {
+        if (atomic->getFrame().get() == normalframe) 
+        {
             normal = atomic.get();
         }
-        if (atomic->getFrame().get() == damageframe) {
+        if (atomic->getFrame().get() == damageframe) 
+        {
             damage = atomic.get();
             damage->setFlag(Atomic::ATOMIC_RENDER, false);
         }
@@ -890,7 +1014,8 @@ void VehicleObject::createObjectHinge(Part* part) {
 
     auto& fn = part->dummy->getName();
 
-    if (fn.find("door") != fn.npos) {
+    if (fn.find("door") != fn.npos) 
+    {
         hingeAxis = {0.f, 0.f, 1.f};
         // hingePosition = {0.f, 0.2f, 0.f};
         boxSize = {0.15f, 0.5f, 0.6f};
@@ -973,19 +1098,23 @@ void VehicleObject::destroyObjectHinge(Part* part) {
     part->moveToAngle = false;
 }
 
-void VehicleObject::setPrimaryColour(uint8_t color) {
+void VehicleObject::setPrimaryColour(uint8_t color) 
+{
     colourPrimary = engine->data->vehicleColours[color];
 }
 
-void VehicleObject::setSecondaryColour(uint8_t color) {
+void VehicleObject::setSecondaryColour(uint8_t color) 
+{
     colourSecondary = engine->data->vehicleColours[color];
 }
 
-bool VehicleObject::isStopped() const {
+bool VehicleObject::isStopped() const 
+{
     return fabsf(physVehicle->getCurrentSpeedKmHour()) < 0.75f;
 }
 
-bool VehicleObject::collectSpecial() {
+bool VehicleObject::collectSpecial() 
+{
     bool hadSpecial = mHasSpecial;
 
     mHasSpecial = false;
@@ -1018,7 +1147,8 @@ void VehicleObject::grantOccupantRewards(CharacterObject* character) {
     }
 }
 
-float VehicleObject::isInFront(const glm::vec3& point) {
+float VehicleObject::isInFront(const glm::vec3& point) 
+{
     // The point we need to test
     glm::vec3 testPoint;
 
@@ -1049,7 +1179,8 @@ float VehicleObject::isInFront(const glm::vec3& point) {
     return distance;
 }
 
-float VehicleObject::isOnSide(const glm::vec3& point) {
+float VehicleObject::isOnSide(const glm::vec3& point) 
+{
     // The point we need to test
     glm::vec3 testPoint;
 
@@ -1080,13 +1211,15 @@ float VehicleObject::isOnSide(const glm::vec3& point) {
     return distance;
 }
 
-std::tuple<glm::vec3, glm::vec3> VehicleObject::obstacleCheckVolume() const {
+std::tuple<glm::vec3, glm::vec3> VehicleObject::obstacleCheckVolume() const 
+{
     const auto& dim = info->handling.dimensions;
     const auto kMaxDistance = 20.f;
     const auto velocity = getVelocity() / info->handling.maxVelocity;
     const auto lookDistance = glm::clamp(kMaxDistance * velocity, 0.f, kMaxDistance);
     const glm::vec3 areaSize{dim.x * 0.6f, 1.0f + lookDistance, 1.0f};
-    return {
+    return 
+    {
             {0.f, dim.y * 0.5f + areaSize.y, 0.f},
             areaSize,
     };
@@ -1108,5 +1241,6 @@ VehicleObject::Part::Part(ModelFrame* p_dummy, Atomic* p_normal,
     , moveToAngle(p_moveToAngle)
     , targetAngle(p_targetAngle)
     , openAngle(p_openAngle)
-    , closedAngle(p_closedAngle) {
+    , closedAngle(p_closedAngle) 
+{
 }

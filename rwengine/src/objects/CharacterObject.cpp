@@ -55,16 +55,20 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     controller->character = this;
 }
 
-CharacterObject::~CharacterObject() {
+CharacterObject::~CharacterObject() 
+{
     destroyActor();
-    if (currentVehicle) {
+    if (currentVehicle) 
+    {
         currentVehicle->setOccupant(getCurrentSeat(), nullptr);
     }
     delete controller;
 }
 
-void CharacterObject::createActor(const glm::vec2& size) {
-    if (physCharacter) {
+void CharacterObject::createActor(const glm::vec2& size) 
+{
+    if (physCharacter) 
+    {
         destroyActor();
     }
 
@@ -119,43 +123,50 @@ void CharacterObject::destroyActor() {
 glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
     glm::vec3 animTranslate{};
 
-    if (isPlayer()) {
+    if (isPlayer()) 
+    {
         auto c = static_cast<ai::PlayerController*>(controller);
 
-        if (c->isTalkingOnPayphone()) {
-            animator->playAnimation(
-                AnimIndexMovement,
-                animations->animation(AnimCycle::PhoneTalk), 1.f,
-                true);
+        if (c->isTalkingOnPayphone()) 
+        {
+            animator->playAnimation(AnimIndexMovement, animations->animation(AnimCycle::PhoneTalk), 1.f, true);
             return glm::vec3();
         }
-        if (c->isPickingUpPayphone()) {
-            if (animator->isCompleted(AnimIndexMovement)) {
+        if (c->isPickingUpPayphone()) 
+        {
+            if (animator->isCompleted(AnimIndexMovement)) 
+            {
                 c->talkOnPayphone();
-            } else {
+            } 
+            else 
+            {
                 return glm::vec3();
             }
         }
-        if (c->isHangingUpPayphone()) {
-            if (animator->isCompleted(AnimIndexMovement)) {
+        if (c->isHangingUpPayphone()) 
+        {
+            if (animator->isCompleted(AnimIndexMovement)) 
+            {
                 c->leavePayphone();
-            } else {
+            } 
+            else 
+            {
                 return glm::vec3();
             }
         }
     }
 
-    if (motionBlockedByActivity) {
+    if (motionBlockedByActivity) 
+    {
         // Clear any residual motion animation
         animator->playAnimation(AnimIndexMovement, nullptr, 1.f, false);
         return glm::vec3();
     }
 
     // Things are simpler if we're in a vehicle
-    if (getCurrentVehicle()) {
-        animator->playAnimation(AnimIndexMovement,
-                                animations->animation(AnimCycle::CarSit), 1.f,
-                                true);
+    if (getCurrentVehicle()) 
+    {
+        animator->playAnimation(AnimIndexMovement, animations->animation(AnimCycle::CarSit), 1.f, true);
         return glm::vec3();
     }
 
@@ -168,70 +179,89 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
     constexpr float movementEpsilon = 0.1f;
 
     float movementLength = glm::length(movement);
-    if (!isAlive()) {
-        movementAnimation =
-            animations->animation(AnimCycle::KnockOutShotFront0);
+    if (!isAlive()) 
+    {
+        movementAnimation = animations->animation(AnimCycle::KnockOutShotFront0);
         repeat = false;
-        if (currentAnim ==
-                animations->animation(AnimCycle::KnockOutShotFront0) &&
-            animator->isCompleted(AnimIndexMovement)) {
+        if (currentAnim == animations->animation(AnimCycle::KnockOutShotFront0) && animator->isCompleted(AnimIndexMovement)) 
+        {
             SetDead();
         }
-    } else if (jumped) {
+    } 
+    else if (jumped) 
+    {
         repeat = false;
         if (currentAnim == animations->animation(AnimCycle::JumpLaunch) &&
-            animator->isCompleted(AnimIndexMovement)) {
+            animator->isCompleted(AnimIndexMovement)) 
+        {
             movementAnimation = animations->animation(AnimCycle::JumpLaunch);
         }
-        if (isOnGround()) {
-            if (currentAnim != animations->animation(AnimCycle::JumpLand) ||
-                !animator->isCompleted(AnimIndexMovement)) {
+        if (isOnGround()) 
+        {
+            if (currentAnim != animations->animation(AnimCycle::JumpLand) || !animator->isCompleted(AnimIndexMovement)) 
+            {
                 movementAnimation = animations->animation(AnimCycle::JumpLand);
-            } else {
+            } 
+            else 
+            {
                 // We are done jumping
                 jumped = false;
             }
-        } else {
+        } 
+        else 
+        {
             movementAnimation = animations->animation(AnimCycle::JumpGlide);
         }
-    } else if (movementLength > movementEpsilon) {
-        if (running && !isActionHappening) {
-            if (movementLength > 1.f) {
+    } 
+    else if (movementLength > movementEpsilon) 
+    {
+        if (running && !isActionHappening) 
+        {
+            if (movementLength > 1.f) 
+            {
                 movementAnimation = animations->animation(AnimCycle::Sprint);
-            } else {
+            } 
+            else 
+            {
                 movementAnimation = animations->animation(AnimCycle::Run);
             }
             animationSpeed = 1.f;
-        } else {
+        } 
+        else 
+        {
             animationSpeed = 1.f / movementLength;
             // Determine if we need to play the walk start animation
-            if (currentAnim != animations->animation(AnimCycle::Walk)) {
-                if (currentAnim !=
-                        animations->animation(AnimCycle::WalkStart) ||
-                    !animator->isCompleted(AnimIndexMovement)) {
-                    movementAnimation =
-                        animations->animation(AnimCycle::WalkStart);
-                } else {
+            if (currentAnim != animations->animation(AnimCycle::Walk)) 
+            {
+                if (currentAnim != animations->animation(AnimCycle::WalkStart) || !animator->isCompleted(AnimIndexMovement)) 
+                {
+                    movementAnimation = animations->animation(AnimCycle::WalkStart);
+                } 
+                else 
+                {
                     movementAnimation = animations->animation(AnimCycle::Walk);
                 }
-            } else {
+            } 
+            else 
+            {
                 // Keep walking
                 movementAnimation = animations->animation(AnimCycle::Walk);
             }
         }
     }
 
-    if (isPlayer() &&
-        static_cast<ai::PlayerController*>(controller)->isAdrenalineActive() &&
-        movementAnimation == animations->animation(AnimCycle::WalkStart)) {
+    if (isPlayer() && static_cast<ai::PlayerController*>(controller)->isAdrenalineActive() && movementAnimation == animations->animation(AnimCycle::WalkStart)) 
+    {
         animationSpeed *= 2;
     }
 
     // Check if we need to change the animation or change speed
-    if (animator->getAnimation(AnimIndexMovement) != movementAnimation) {
-        animator->playAnimation(AnimIndexMovement, movementAnimation,
-                                animationSpeed, repeat);
-    } else {
+    if (animator->getAnimation(AnimIndexMovement) != movementAnimation) 
+    {
+        animator->playAnimation(AnimIndexMovement, movementAnimation, animationSpeed, repeat);
+    } 
+    else 
+    {
         animator->setAnimationSpeed(AnimIndexMovement, animationSpeed);
     }
 
@@ -528,12 +558,16 @@ size_t CharacterObject::getCurrentSeat() const {
     return currentSeat;
 }
 
-void CharacterObject::setCurrentVehicle(VehicleObject* value, size_t seat) {
+void CharacterObject::setCurrentVehicle(VehicleObject* value, size_t seat) 
+{
     currentVehicle = value;
     currentSeat = seat;
-    if (currentVehicle == nullptr && physCharacter == nullptr) {
+    if (currentVehicle == nullptr && physCharacter == nullptr) 
+    {
         createActor();
-    } else if (currentVehicle) {
+    } 
+    else if (currentVehicle) 
+    {
         destroyActor();
     }
 }
@@ -560,8 +594,10 @@ bool CharacterObject::takeDamage(const GameObject::DamageInfo& dmg) {
     return true;
 }
 
-void CharacterObject::jump() {
-    if (physCharacter) {
+void CharacterObject::jump() 
+{
+    if (physCharacter) 
+    {
 #if BT_BULLET_VERSION < 285
         physCharacter->jump();
 #else
@@ -659,30 +695,38 @@ void CharacterObject::playCycleAnimOverride(AnimCycle cycle,
                             flags & AnimCycleInfo::Repeat);
 }
 
-void CharacterObject::addToInventory(int slot, int ammo) {
+void CharacterObject::addToInventory(int slot, int ammo) 
+{
     RW_CHECK(slot < kMaxInventorySlots, "Slot greater than kMaxInventorySlots");
-    if (slot < kMaxInventorySlots) {
+    if (slot < kMaxInventorySlots) 
+    {
         currentState.weapons[slot].weaponId = slot;
         currentState.weapons[slot].bulletsTotal += ammo;
     }
 }
 
-void CharacterObject::setActiveItem(int slot) {
+void CharacterObject::setActiveItem(int slot) 
+{
     currentState.currentWeapon = slot;
 }
 
-void CharacterObject::removeFromInventory(int slot) {
+void CharacterObject::removeFromInventory(int slot) 
+{
     currentState.weapons[slot].weaponId = 0;
-    if (currentState.currentWeapon == slot) {
+    if (currentState.currentWeapon == slot) 
+    {
         currentState.currentWeapon = 0;
     }
 }
 
-void CharacterObject::cycleInventory(bool up) {
-    if (up) {
-        for (int j = currentState.currentWeapon + 1; j < kMaxInventorySlots;
-             ++j) {
-            if (currentState.weapons[j].weaponId != 0) {
+void CharacterObject::cycleInventory(bool up) 
+{
+    if (up) 
+    {
+        for (int j = currentState.currentWeapon + 1; j < kMaxInventorySlots; ++j) 
+        {
+            if (currentState.weapons[j].weaponId != 0) 
+            {
                 currentState.currentWeapon = j;
                 return;
             }
@@ -690,19 +734,25 @@ void CharacterObject::cycleInventory(bool up) {
 
         // if there's no higher slot, set the first item.
         currentState.currentWeapon = 0;
-    } else {
-        for (int j = currentState.currentWeapon - 1; j >= 0; --j) {
+    } 
+    else 
+    {
+        for (int j = currentState.currentWeapon - 1; j >= 0; --j) 
+        {
             bool isFist = j == 0;
-            if (currentState.weapons[j].weaponId != 0 || isFist) {
+            if (currentState.weapons[j].weaponId != 0 || isFist) 
+            {
                 currentState.currentWeapon = j;
                 return;
             }
         }
 
         // Nothing? set the highest
-        for (int j = kMaxInventorySlots - 1; j >= 0; --j) {
+        for (int j = kMaxInventorySlots - 1; j >= 0; --j) 
+        {
             bool isFist = j == 0;
-            if (currentState.weapons[j].weaponId != 0 || isFist) {
+            if (currentState.weapons[j].weaponId != 0 || isFist) 
+            {
                 currentState.currentWeapon = j;
                 return;
             }
@@ -710,28 +760,38 @@ void CharacterObject::cycleInventory(bool up) {
     }
 }
 
-void CharacterObject::useItem(bool active, bool primary) {
+void CharacterObject::useItem(bool active, bool primary) 
+{
     /// @todo verify if this is the correct logic
     auto item = getActiveItem();
-    if (currentState.weapons[item].weaponId == unsigned(item)) {
-        if (primary) {
-            if (!currentState.primaryActive && active) {
+    if (currentState.weapons[item].weaponId == unsigned(item)) 
+    {
+        if (primary) 
+        {
+            if (!currentState.primaryActive && active) 
+            {
                 // If we've just started, activate
                 controller->setNextActivity(
                     std::make_unique<ai::Activities::UseItem>(item));
-            } else if (currentState.primaryActive && !active) {
+            } 
+            else if (currentState.primaryActive && !active) 
+            {
                 // UseItem will cancel itself upon !primaryActive
             }
             currentState.primaryActive = active;
-        } else {
+        } 
+        else 
+        {
             currentState.secondaryActive = active;
             /// @todo handle scopes and sights
         }
     }
 }
 
-void CharacterObject::clearInventory() {
-    for (int slot = 0; slot < kMaxInventorySlots; ++slot) {
+void CharacterObject::clearInventory() 
+{
+    for (int slot = 0; slot < kMaxInventorySlots; ++slot) 
+    {
         removeFromInventory(slot);
     }
 }

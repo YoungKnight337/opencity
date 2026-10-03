@@ -15,7 +15,8 @@ class GameWorld;
  * @struct InstanceObject
  *  A simple object instance
  */
-class InstanceObject final : public GameObject {
+class InstanceObject final : public GameObject 
+{
     float health = 100.f;
     bool visible =true;
     bool floating = false;
@@ -39,11 +40,13 @@ public:
                    DynamicObjectData* dyn);
     ~InstanceObject() override;
 
-    Type type() const override {
+    Type type() const override 
+    {
         return Instance;
     }
 
-    const AtomicPtr& getAtomic() const {
+    const AtomicPtr& getAtomic() const 
+    {
         return atomic_;
     }
 
@@ -63,27 +66,33 @@ public:
 
     void setStatic(bool s);
 
-    bool isStatic() const {
+    bool isStatic() const 
+    {
         return static_;
     }
 
-    void setVisible(bool v) {
+    void setVisible(bool v) 
+    {
         visible = v;
     }
 
-    bool isVisible() const {
+    bool isVisible() const 
+    {
         return visible;
     }
 
-    void setFloating(bool f) {
+    void setFloating(bool f) 
+    {
         floating = f;
     }
 
-    bool isFloating() const {
+    bool isFloating() const 
+    {
         return floating;
     }
 
-    float getHealth() const {
+    float getHealth() const 
+    {
         return health;
     }
 };

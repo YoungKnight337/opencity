@@ -25,7 +25,8 @@ struct PathData;
  */
 using ModelID = uint16_t;
 
-enum class ModelDataType {
+enum class ModelDataType 
+{
     SimpleInfo = 1,
     /** Unknown */
     MLoModelInfo = 2,
@@ -42,7 +43,8 @@ enum class ModelDataType {
  * @todo reference counting
  * @todo store collision model
  */
-class BaseModelInfo {
+class BaseModelInfo 
+{
 public:
     std::string name;
     std::string textureslot;
@@ -51,33 +53,40 @@ public:
 
     virtual ~BaseModelInfo();
 
-    ModelID id() const {
+    ModelID id() const 
+    {
         return modelid_;
     }
 
-    void setModelID(ModelID id) {
+    void setModelID(ModelID id) 
+    {
         modelid_ = id;
     }
 
-    ModelDataType type() const {
+    ModelDataType type() const 
+    {
         return type_;
     }
 
-    void addReference() {
+    void addReference() 
+    {
         refcount_++;
     }
 
-    void removeReference() {
+    void removeReference() 
+    {
         refcount_--;
     }
 
-    int getReferenceCount() const {
+    int getReferenceCount() const 
+    {
         return refcount_;
     }
 
     void setCollisionModel(std::unique_ptr<CollisionModel>& col);
 
-    CollisionModel* getCollision() const {
+    CollisionModel* getCollision() const 
+    {
         return collision.get();
     }
 
@@ -86,8 +95,10 @@ public:
 
     virtual void unload() = 0;
 
-    static std::string getTypeName(ModelDataType type) {
-        switch (type) {
+    static std::string getTypeName(ModelDataType type)
+    {
+        switch (type) 
+        {
             case ModelDataType::SimpleInfo:
                 return "Simple";
             case ModelDataType::VehicleInfo:
@@ -131,7 +142,8 @@ const static std::unordered_set<std::string> doorModels = {
  *
  * @todo replace Model* with librw types
  */
-class SimpleModelInfo : public BaseModelInfo {
+class SimpleModelInfo : public BaseModelInfo 
+{
 public:
     static constexpr ModelDataType kType = ModelDataType::SimpleInfo;
 
@@ -148,57 +160,70 @@ public:
     ~SimpleModelInfo() override;
 
     /// @todo change with librw
-    void setAtomic(const ClumpPtr& model, int n, const AtomicPtr& atomic) {
+    void setAtomic(const ClumpPtr& model, int n, const AtomicPtr& atomic) 
+    {
         model_ = model;
         /// @todo disassociated the Atomic from Clump
         atomics_[n] = atomic;
     }
 
     /// @todo remove this
-    ClumpPtr getModel() const {
+    ClumpPtr getModel() const 
+    {
         return model_;
     }
 
-    Atomic* getAtomic(int n) const {
+    Atomic* getAtomic(int n) const 
+    {
         return atomics_[n].get();
     }
 
-    void setLodDistance(int n, float d) {
+    void setLodDistance(int n, float d) 
+    {
         RW_CHECK(n < 3, "Lod Index out of range");
         loddistances_[n] = d;
     }
 
-    float getLodDistance(int n) const {
+    float getLodDistance(int n) const 
+    {
         RW_CHECK(n < 3, "Lod Index out of range");
         return loddistances_[n];
     }
 
-    Atomic* getDistanceAtomic(float d) {
-        for (auto i = 0; i < getNumAtomics(); ++i) {
-            if (d < loddistances_[i]) {
+    Atomic* getDistanceAtomic(float d) 
+    {
+        for (auto i = 0; i < getNumAtomics(); ++i) 
+        {
+            if (d < loddistances_[i])
+            {
                 return atomics_[i].get();
             }
         }
         return nullptr;
     }
 
-    void setNumAtomics(int num) {
+    void setNumAtomics(int num) 
+    {
         numatomics_ = num;
     }
 
-    int getNumAtomics() const {
+    int getNumAtomics() const 
+    {
         return numatomics_;
     }
 
-    bool isLoaded() const override {
+    bool isLoaded() const override
+    {
         return model_.get() != nullptr;
     }
 
-    void unload() override {
+    void unload() override 
+    {
         model_ = nullptr;
     }
 
-    enum {
+    enum 
+    {
         /// Cull model if player doesn't look at it. Ignored in GTA 3.
         NORMAL_CULL = 1,
         /// Do not fade the object when it is being
@@ -229,38 +254,45 @@ public:
 
     // Set up data for big building objects
     void setupBigBuilding(const ModelInfoTable& models);
-    bool isBigBuilding() const {
+    bool isBigBuilding() const
+    {
         return isbigbuilding_;
     }
 
     void findRelatedModel(const ModelInfoTable& models);
 
-    float getLargestLodDistance() const {
-        return furthest_ != 0 ? loddistances_[furthest_ - 1]
-                              : loddistances_[numatomics_ - 1];
+    float getLargestLodDistance() const 
+    {
+        return furthest_ != 0 ? loddistances_[furthest_ - 1] : loddistances_[numatomics_ - 1];
     }
 
-    float getNearLodDistance() const {
+    float getNearLodDistance() const 
+    {
         return loddistances_[2];
     }
 
-    void determineFurthest() {
+    void determineFurthest() 
+    {
         furthest_ = 0;
-        if (numatomics_ == 2) {
+        if (numatomics_ == 2) 
+        {
             furthest_ = loddistances_[0] >= loddistances_[1] ? 1 : 0;
         }
-        if (numatomics_ == 3) {
+        if (numatomics_ == 3) 
+        {
             furthest_ = loddistances_[0] >= loddistances_[1]
                             ? 1
                             : loddistances_[1] >= loddistances_[2] ? 2 : 0;
         }
     }
 
-    SimpleModelInfo* related() const {
+    SimpleModelInfo* related() const 
+    {
         return related_;
     }
 
-    static bool isDoorModel(std::string m) {
+    static bool isDoorModel(std::string m) 
+    {
         return doorModels.find(m) != doorModels.end();
     }
 
@@ -279,36 +311,45 @@ private:
 /**
  * @todo this
  */
-class TimeModelInfo : public SimpleModelInfo {
-    TimeModelInfo() : SimpleModelInfo(ModelDataType::TimeModelInfo) {
+class TimeModelInfo : public SimpleModelInfo 
+{
+    TimeModelInfo() : SimpleModelInfo(ModelDataType::TimeModelInfo) 
+    {
     }
 };
 
 /**
  * @todo document me
  */
-class ClumpModelInfo : public BaseModelInfo {
+class ClumpModelInfo : public BaseModelInfo 
+{
 public:
     static constexpr ModelDataType kType = ModelDataType::ClumpInfo;
 
-    ClumpModelInfo() : BaseModelInfo(kType) {
+    ClumpModelInfo() : BaseModelInfo(kType) 
+    {
     }
-    ClumpModelInfo(ModelDataType type) : BaseModelInfo(type) {
+    ClumpModelInfo(ModelDataType type) : BaseModelInfo(type) 
+    {
     }
 
-    void setModel(const ClumpPtr& model) {
+    void setModel(const ClumpPtr& model) 
+    {
         model_ = model;
     }
 
-    ClumpPtr getModel() const {
+    ClumpPtr getModel() const 
+    {
         return model_;
     }
 
-    bool isLoaded() const override {
+    bool isLoaded() const override 
+    {
         return model_.get() != nullptr;
     }
 
-    void unload() override {
+    void unload() override 
+    {
         model_ = nullptr;
     }
 
@@ -316,7 +357,8 @@ private:
     ClumpPtr model_ = nullptr;
 };
 
-enum class ComponentRuleType {
+enum class ComponentRuleType 
+{
     Any = 1,
     RainOnly = 2,
     Optional = 3,
@@ -326,14 +368,17 @@ enum class ComponentRuleType {
 /**
  * Data for a vehicle model type
  */
-class VehicleModelInfo : public ClumpModelInfo {
+class VehicleModelInfo : public ClumpModelInfo 
+{
 public:
     static constexpr ModelDataType kType = ModelDataType::VehicleInfo;
 
-    VehicleModelInfo() : ClumpModelInfo(kType) {
+    VehicleModelInfo() : ClumpModelInfo(kType) 
+    {
     }
 
-    enum VehicleClass {
+    enum VehicleClass 
+    {
         IGNORE = 0,
         NORMAL = 1,
         POORFAMILY = 1 << 1,
@@ -352,7 +397,8 @@ public:
         SPECIAL = 1 << 13,
     };
 
-    enum VehicleType {
+    enum VehicleType 
+    {
         CAR,
         BOAT,
         TRAIN,
@@ -371,7 +417,8 @@ public:
     unsigned long componentrules_;
     std::string vehiclename_;
 
-    static VehicleType findVehicleType(const std::string& name) {
+    static VehicleType findVehicleType(const std::string& name) 
+    {
         static const std::unordered_map<std::string, VehicleType> vehicleTypes{
             {"car", CAR},
             {"boat", BOAT},
@@ -381,8 +428,10 @@ public:
         return vehicleTypes.at(name);
     }
 
-    static VehicleClass findVehicleClass(const std::string& name) {
-        static const std::unordered_map<std::string, VehicleClass> classTypes{
+    static VehicleClass findVehicleClass(const std::string& name) 
+    {
+        static const std::unordered_map<std::string, VehicleClass> classTypes
+        {
             // III, VC, SA
             {"ignore", IGNORE},
             {"normal", NORMAL},
@@ -405,14 +454,17 @@ public:
     }
 };
 
-class PedModelInfo : public ClumpModelInfo {
+class PedModelInfo : public ClumpModelInfo 
+{
 public:
     static constexpr ModelDataType kType = ModelDataType::PedInfo;
 
-    PedModelInfo() : ClumpModelInfo(kType) {
+    PedModelInfo() : ClumpModelInfo(kType) 
+    {
     }
 
-    enum PedType {
+    enum PedType 
+    {
         // III
         PLAYER1 = 0,
         PLAYER2,
@@ -446,8 +498,10 @@ public:
     /// The mask of vehicle classes this ped can drive
     int carsmask_ = 0;
 
-    static PedType findPedType(const std::string& name) {
-        static const std::unordered_map<std::string, PedType> pedTypes{
+    static PedType findPedType(const std::string& name) 
+    {
+        static const std::unordered_map<std::string, PedType> pedTypes
+        {
             // III
             {"PLAYER1", PLAYER1},
             {"PLAYER2", PLAYER2},
@@ -479,7 +533,8 @@ public:
  * This is orthogonal to object class, it gives
  * Instances different physical properties.
  */
-struct DynamicObjectData {
+struct DynamicObjectData 
+{
     float mass;        // Kg
     float turnMass;    // Kg m^3
     float airRes;      // fraction
@@ -488,7 +543,8 @@ struct DynamicObjectData {
     float uprootForce;  // Force
     float collDamageMulti;
 
-    enum {
+    enum 
+    {
         Damage_ChangeModel = 1,
         Damage_SplitModel = 2,
         Damage_Smash = 3,
@@ -500,7 +556,8 @@ struct DynamicObjectData {
     };
     uint8_t collDamageEffect;
 
-    enum {
+    enum 
+    {
         Response_None = 0,
         Response_LampPost = 1,
         Response_SmallBox = 2,

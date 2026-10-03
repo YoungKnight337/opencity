@@ -6,12 +6,15 @@
 #include <cstdint>
 #include <vector>
 
-namespace ai {
+namespace ai 
+{
 
-enum class NodeType { Vehicle, Pedestrian };
+enum class NodeType { Vehicle, Pedestrian, Train };
 
-struct AIGraphNode {
-    enum {
+struct AIGraphNode 
+{
+    enum 
+    {
         None = 0,
         CrossesRoad =
             1  /// No documentation for other flags yet, but this is mentioned.

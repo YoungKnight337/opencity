@@ -13,11 +13,13 @@
 #include "objects/ProjectileObject.hpp"
 
 
-bool WeaponScan::doesDamage(GameObject* target) const {
+bool WeaponScan::doesDamage(GameObject* target) const 
+{
     return target != source;
 }
 
-void Weapon::fireHitscan(WeaponData* weapon, CharacterObject* owner) {
+void Weapon::fireHitscan(WeaponData* weapon, CharacterObject* owner) 
+{
     auto handFrame = owner->getClump()->findFrame("srhand");
     glm::mat4 handMatrix = handFrame->getWorldTransform();
 
@@ -29,8 +31,8 @@ void Weapon::fireHitscan(WeaponData* weapon, CharacterObject* owner) {
     owner->engine->doWeaponScan({dmg, fireOrigin, rayend, weapon, owner});
 }
 
-void Weapon::fireProjectile(WeaponData* weapon, CharacterObject* owner,
-                            float force) {
+void Weapon::fireProjectile(WeaponData* weapon, CharacterObject* owner, float force) 
+{
     auto handPos = glm::vec3(0.f, 1.5f, 1.f);
     auto fireOrigin = owner->getPosition() + owner->getRotation() * handPos;
     auto direction =
@@ -54,7 +56,8 @@ void Weapon::fireProjectile(WeaponData* weapon, CharacterObject* owner,
     owner->engine->allObjects.push_back(ptr);
 }
 
-void Weapon::meleeHit(WeaponData* weapon, CharacterObject* character) {
+void Weapon::meleeHit(WeaponData* weapon, CharacterObject* character) 
+{
     const auto center = character->getPosition() + character->getRotation()
                                                    * weapon->fireOffset;
     auto e = character->engine;
@@ -65,17 +68,21 @@ void Weapon::meleeHit(WeaponData* weapon, CharacterObject* character) {
                     });
 }
 
-bool Weapon::targetOnGround(WeaponData *weapon, CharacterObject *character) {
+bool Weapon::targetOnGround(WeaponData *weapon, CharacterObject *character)
+{
     const auto center = character->getPosition() + character->getRotation()
                                                    * weapon->fireOffset;
     HitTest test {*character->engine->dynamicsWorld};
     const auto result = test.sphereTest(center, weapon->meleeRadius);
     bool ground = false;
-    for (const auto& r : result) {
-        if (r.object == character) {
+    for (const auto& r : result) 
+    {
+        if (r.object == character) 
+        {
             continue;
         }
-        if (r.object->type() == GameObject::Character) {
+        if (r.object->type() == GameObject::Character) 
+        {
             ground |= static_cast<CharacterObject *>(r.object)->isKnockedDown();
         }
     }

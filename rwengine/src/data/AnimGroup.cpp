@@ -7,7 +7,8 @@
 #include <rw/forward.hpp>
 
 // The default animations for every cycle
-const std::vector<AnimGroup> kBuiltInAnimGroups{
+const std::vector<AnimGroup> kBuiltInAnimGroups
+{
     {"man",
      {
          {"walk_civi", 0xe2},
@@ -366,13 +367,17 @@ const std::vector<AnimGroup> kBuiltInAnimGroups{
 
 AnimGroup AnimGroup::getBuiltInAnimGroup(AnimationSet &animations,
                                          const std::string &name) {
-    auto findgroup = [&]() {
+    auto findgroup = [&]() 
+    {
         auto it =
             std::find_if(kBuiltInAnimGroups.begin(), kBuiltInAnimGroups.end(),
                          [&](const AnimGroup &g) { return g.name_ == name; });
-        if (it != kBuiltInAnimGroups.end()) {
+        if (it != kBuiltInAnimGroups.end()) 
+        {
             return *it;
-        } else {
+        } 
+        else 
+        {
             RW_MESSAGE("No such animation group: " + name +
                        ". Returning first animation group");
             return kBuiltInAnimGroups[0];
@@ -382,10 +387,12 @@ AnimGroup AnimGroup::getBuiltInAnimGroup(AnimationSet &animations,
     auto group = AnimGroup(findgroup());
 
     uint32_t id = 0;
-    for (auto &a : group.animations_) {
+    for (auto &a : group.animations_) 
+    {
         // Copy from the first animgroup if this entry is empty
         /// @todo check if this is realy how we should do this
-        if (a.name.empty()) {
+        if (a.name.empty()) 
+        {
             a = kBuiltInAnimGroups[0].animations_[id];
         }
 

@@ -10,12 +10,14 @@
 
 struct PathData;
 
-namespace ai {
+namespace ai 
+{
 
 enum class NodeType;
 struct AIGraphNode;
 
-class AIGraph {
+class AIGraph 
+{
 public:
     ~AIGraph() = default;
 
@@ -33,11 +35,9 @@ public:
      */
     std::array<std::vector<AIGraphNode*>, WORLD_GRID_CELLS> gridNodes;
 
-    void createPathNodes(const glm::vec3& position, const glm::quat& rotation,
-                         PathData& path);
+    void createPathNodes(const glm::vec3& position, const glm::quat& rotation, PathData& path);
 
-    void gatherExternalNodesNear(const glm::vec3& center, const float radius,
-                                 std::vector<AIGraphNode*>& nodes, NodeType type);
+    void gatherExternalNodesNear(const glm::vec3& center, const float radius, std::vector<AIGraphNode*>& nodes, NodeType type);
 };
 
 } // ai

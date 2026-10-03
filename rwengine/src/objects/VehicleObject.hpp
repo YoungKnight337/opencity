@@ -39,7 +39,8 @@ struct btVehicleRaycaster;
  * @class VehicleObject
  * Implements Vehicle behaviours.
  */
-class VehicleObject final : public GameObject {
+class VehicleObject final : public GameObject 
+{
 private:
     float steerAngle{0.f};
     float throttle{0.f};
@@ -66,7 +67,8 @@ public:
     std::unique_ptr<btVehicleRaycaster> physRaycaster;
     std::unique_ptr<btRaycastVehicle> physVehicle;
 
-    struct Part {
+    struct Part 
+    {
         Part(ModelFrame* p_dummy, Atomic* p_normal, Atomic* p_damaged,
              std::unique_ptr<btCollisionShape> p_cs,
              std::unique_ptr<btRigidBody> p_body,
@@ -106,18 +108,22 @@ public:
 
     glm::vec3 getCenterOffset() override;
 
-    VehicleModelInfo* getVehicle() const {
+    VehicleModelInfo* getVehicle() const 
+    {
         return getModelInfo<VehicleModelInfo>();
     }
 
-    Atomic* getHighLOD() const {
+    Atomic* getHighLOD() const 
+    {
         return chassishigh_;
     }
-    Atomic* getLowLOD() const {
+    Atomic* getLowLOD() const 
+    {
         return chassislow_;
     }
 
-    Type type() const override {
+    Type type() const override 
+    {
         return Vehicle;
     }
 

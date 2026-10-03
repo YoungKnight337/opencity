@@ -15,7 +15,7 @@
 namespace ai {
 class CharacterController;
 }
-
+ 
 class BaseModelInfo;
 class btCapsuleShapeZ;
 class btKinematicCharacterController;
@@ -27,14 +27,16 @@ constexpr int kMaxInventorySlots = 13;
 constexpr unsigned int AnimIndexMovement = 0;
 constexpr unsigned int AnimIndexAction = 1;
 
-struct CharacterWeaponSlot {
+struct CharacterWeaponSlot 
+{
     // Assuming these match the entries in weapon.dat
     uint32_t weaponId;
     uint32_t bulletsClip;
     uint32_t bulletsTotal;
 };
 
-struct CharacterState {
+struct CharacterState
+{
     float health = 100.f;
     float armour = 0.f;
     bool isDying = false;
@@ -53,7 +55,8 @@ class GameWorld;
  * @brief The CharacterObject struct
  * Implements Character object behaviours.
  */
-class CharacterObject final : public GameObject {
+class CharacterObject final : public GameObject 
+{
 private:
     CharacterState currentState{};
 
@@ -101,7 +104,8 @@ public:
 
     ~CharacterObject() override;
 
-    Type type() const override {
+    Type type() const override 
+    {
         return Character;
     }
 
@@ -109,10 +113,12 @@ public:
 
     void tickPhysics(float dt);
 
-    const CharacterState& getCurrentState() const {
+    const CharacterState& getCurrentState() const 
+    {
         return currentState;
     }
-    CharacterState& getCurrentState() {
+    CharacterState& getCurrentState() 
+    {
         return currentState;
     }
 
@@ -165,14 +171,17 @@ public:
     bool isOnGround() const;
     bool canTurn() const;
 
-    void setRunning(bool run) {
+    void setRunning(bool run) 
+    {
         running = run;
     }
-    bool isRunning() const {
+    bool isRunning() const 
+    {
         return running;
     }
 
-    bool isStrafing() const {
+    bool isStrafing() const 
+    {
         /// @todo implement strafing
         return false;
     }
@@ -183,20 +192,25 @@ public:
      */
     void resetToAINode();
 
-    void setMovement(const glm::vec3& _m) {
+    void setMovement(const glm::vec3& _m) 
+    {
         movement = _m;
     }
-    const glm::vec3& getMovement() const {
+    const glm::vec3& getMovement() const 
+    {
         return movement;
     }
-    void setLook(const glm::vec2& look) {
+    void setLook(const glm::vec2& look) 
+    {
         m_look = look;
     }
-    const glm::vec2& getLook() const {
+    const glm::vec2& getLook() const 
+    {
         return m_look;
     }
 
-    glm::vec3 getLookDirection() const {
+    glm::vec3 getLookDirection() const
+    {
         float theta = m_look.y - glm::half_pi<float>();
         return glm::vec3(std::sin(-m_look.x) * std::cos(theta),
                          std::cos(-m_look.x) * std::cos(theta),

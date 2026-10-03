@@ -7,8 +7,10 @@
 #include <string>
 #include <vector>
 
-struct PathNode {
-    enum NodeType {
+struct PathNode 
+{
+    enum NodeType 
+    {
         EMPTY = 0,     /// These are ignored
         EXTERNAL = 1,  /// May join with other paths
         INTERNAL = 2   /// Internal to this path
@@ -18,12 +20,15 @@ struct PathNode {
     int32_t next;
     glm::vec3 position{};
     float size;
+    int speed;
     int leftLanes;
     int rightLanes;
+    bool roadblock;
 };
 
-struct PathData {
-    enum PathType { PATH_PED, PATH_CAR };
+struct PathData 
+{
+    enum PathType { PATH_PED, PATH_CAR, PATH_TRAIN };
 
     PathType type;
     uint16_t ID;

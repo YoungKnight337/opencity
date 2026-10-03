@@ -12,7 +12,8 @@
 /**
  * @brief Stores data loaded from handling.cfg
  */
-struct VehicleHandlingInfo {
+struct VehicleHandlingInfo 
+{
     enum EngineType { Diesel = 'D', Petrol = 'P', Electric = 'E' };
 
     enum DriveType { Forward = 'F', Rear = 'R', All = '4' };
@@ -43,7 +44,8 @@ struct VehicleHandlingInfo {
     float suspensionBias;
     uint32_t flags;
 
-    enum /*VehicleFlags*/ {
+    enum /*VehicleFlags*/ 
+    {
         VF_1G_BOOST = 1 << 0,
         VF_2G_BOOST = 2 << 0,
         VF_REV_BONNET = 4 << 0,
@@ -63,11 +65,13 @@ struct VehicleHandlingInfo {
     };
 };
 
-struct WheelInfo {
+struct WheelInfo 
+{
     glm::vec3 position{};
 };
 
-struct SeatInfo {
+struct SeatInfo 
+{
     glm::vec3 offset{};
 };
 
@@ -75,20 +79,24 @@ struct SeatInfo {
  * @brief Vehicle Handling and runtime-derrived information about wheel and seat
  * positions.
  */
-struct VehicleInfo {
+struct VehicleInfo 
+{
     /** Handling data */
     VehicleHandlingInfo handling;
 
     /** Value for caching wheel information */
     std::vector<WheelInfo> wheels;
     /** Struct for caching seat information */
-    struct Seats{
+    struct Seats
+    {
         std::vector<SeatInfo> front;
         std::vector<SeatInfo> back;
 
-        SeatInfo operator[](size_t index) const {
+        SeatInfo operator[](size_t index) const 
+        {
             // Try front seats first
-            if (index < front.size()) {
+            if (index < front.size()) 
+            {
                 return front[index];
             }
             index -= front.size();
@@ -96,10 +104,14 @@ struct VehicleInfo {
             // Get back seat
             return back[index];
         }
-        size_t size() const {
+       
+        size_t size() const 
+        {
             return front.size() + back.size();
         }
-        bool empty() const {
+        
+        bool empty() const 
+        {
             return front.empty() && back.empty();
         }
     };
@@ -109,7 +121,8 @@ struct VehicleInfo {
     VehicleInfo(VehicleHandlingInfo p_handling, T1&& p_wheels, T2&& p_seats)
         : handling(p_handling)
         , wheels(std::forward<T1>(p_wheels))
-        , seats(std::forward<T2>(p_seats)) {
+        , seats(std::forward<T2>(p_seats)) 
+    {
     }
 };
 

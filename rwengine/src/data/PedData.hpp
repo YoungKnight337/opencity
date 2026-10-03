@@ -5,7 +5,8 @@
 #include <string>
 #include <vector>
 
-class PedStats {
+class PedStats 
+{
 public:
     int id_;
     std::string name_;
@@ -22,7 +23,8 @@ public:
 };
 using PedStatsList = std::vector<PedStats>;
 
-class PedRelationship {
+class PedRelationship 
+{
 public:
     enum {
         THREAT_PLAYER1 = 1,          // Player

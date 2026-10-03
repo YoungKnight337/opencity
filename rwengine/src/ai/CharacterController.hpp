@@ -10,7 +10,8 @@
 class CharacterObject;
 class VehicleObject;
 
-namespace ai {
+namespace ai 
+{
 
 struct AIGraphNode;
 
@@ -19,12 +20,14 @@ struct AIGraphNode;
  * Character Controller Interface, translates high-level behaviours into low
  * level actions.
  */
-class CharacterController {
+class CharacterController 
+{
 public:
     /**
      * @brief The Activity struct interface
      */
-    struct Activity {
+    struct Activity 
+    {
         virtual ~Activity() = default;
 
         virtual std::string name() const = 0;
@@ -33,18 +36,19 @@ public:
          * @brief canSkip
          * @return true if the activity can be skipped.
          */
-        virtual bool canSkip(CharacterObject*, CharacterController*) const {
+        virtual bool canSkip(CharacterObject*, CharacterController*) const 
+        {
             return false;
         }
 
-        virtual bool update(CharacterObject* character,
-                            CharacterController* controller) = 0;
+        virtual bool update(CharacterObject* character, CharacterController* controller) = 0;
     };
 
     /**
      * Available AI goals.
      */
-    enum Goal {
+    enum Goal 
+    {
         /**
          * No goal, will idle or execute external Activities.
          */
@@ -98,7 +102,8 @@ public:
      * Callers may not store the returned pointer.
      * @return Activity pointer.
      */
-    Activity* getCurrentActivity() const {
+    Activity* getCurrentActivity() const 
+    {
         return _currentActivity.get();
     }
 
@@ -107,7 +112,8 @@ public:
      * Callers may not store the returned pointer.
      * @return Activity pointer.
      */
-    Activity* getNextActivity() const {
+    Activity* getNextActivity() const 
+    {
         return _nextActivity.get();
     }
 
@@ -163,27 +169,33 @@ public:
      */
     bool checkForObstacles();
 
-    void setLane(int lane) {
+    void setLane(int lane) 
+    {
         m_lane = lane;
     }
 
-    int getLane() const {
+    int getLane() const 
+    {
         return m_lane;
     }
 
     void setRunning(bool run);
 
-    void setGoal(Goal goal) {
+    void setGoal(Goal goal) 
+    {
         currentGoal = goal;
     }
-    Goal getGoal() const {
+    Goal getGoal() const
+    {
         return currentGoal;
     }
 
-    void setTargetCharacter(CharacterObject* c) {
+    void setTargetCharacter(CharacterObject* c) 
+    {
         leader = c;
     }
-    CharacterObject* getTargetCharacter() const {
+    CharacterObject* getTargetCharacter() const 
+    {
         return leader;
     }
 
@@ -203,25 +215,30 @@ public:
  *
  * @todo Move into ControllerActivities.hpp or equivelant
  */
-namespace Activities {
-struct GoTo : public CharacterController::Activity {
+namespace Activities 
+{
+struct GoTo : public CharacterController::Activity 
+{
     DECL_ACTIVITY(GoTo)
 
     glm::vec3 target;
     bool sprint;
 
     GoTo(const glm::vec3& target, bool _sprint = false)
-        : target(target), sprint(_sprint) {
+        : target(target), sprint(_sprint) 
+    {
     }
 
     bool update(CharacterObject* character, CharacterController* controller) override;
 
-    bool canSkip(CharacterObject*, CharacterController*) const override {
+    bool canSkip(CharacterObject*, CharacterController*) const override 
+    {
         return true;
     }
 };
 
-struct DriveTo : public CharacterController::Activity {
+struct DriveTo : public CharacterController::Activity 
+{
     DECL_ACTIVITY(DriveTo)
 
     AIGraphNode* targetNode = nullptr;
@@ -230,41 +247,48 @@ struct DriveTo : public CharacterController::Activity {
     DriveTo() = default;
 
     DriveTo(AIGraphNode* targetNode, bool _rampant = false)
-        : targetNode(targetNode), rampant(_rampant) {
+        : targetNode(targetNode), rampant(_rampant) 
+    {
     }
 
     bool update(CharacterObject* character, CharacterController* controller) override;
 
-    bool canSkip(CharacterObject*, CharacterController*) const override {
+    bool canSkip(CharacterObject*, CharacterController*) const override 
+    {
         return true;
     }
 };
 
-struct Jump : public CharacterController::Activity {
+struct Jump : public CharacterController::Activity 
+{
     DECL_ACTIVITY(Jump)
 
     bool jumped;
 
-    Jump() : jumped(false) {
+    Jump() : jumped(false) 
+    {
     }
 
     bool update(CharacterObject* character, CharacterController* controller) override;
 };
 
-struct EnterVehicle : public CharacterController::Activity {
+struct EnterVehicle : public CharacterController::Activity 
+{
     DECL_ACTIVITY(EnterVehicle)
 
     VehicleObject* vehicle;
     int seat;
 
-    enum {
+    enum 
+    {
         ANY_SEAT = -1  // Magic number for any seat but the driver's.
     };
 
     bool entering;
 
     EnterVehicle(VehicleObject* vehicle, int seat = 0)
-        : vehicle(vehicle), seat(seat), entering(false) {
+        : vehicle(vehicle), seat(seat), entering(false) 
+    {
     }
 
     bool canSkip(CharacterObject* character,
@@ -273,25 +297,29 @@ struct EnterVehicle : public CharacterController::Activity {
     bool update(CharacterObject* character, CharacterController* controller) override;
 };
 
-struct ExitVehicle : public CharacterController::Activity {
+struct ExitVehicle : public CharacterController::Activity 
+{
     DECL_ACTIVITY(ExitVehicle)
 
     const bool jacked;
 
-    ExitVehicle(bool jacked_ = false) : jacked(jacked_) {
+    ExitVehicle(bool jacked_ = false) : jacked(jacked_) 
+    {
     }
 
     bool update(CharacterObject* character, CharacterController* controller) override;
 };
 
-struct UseItem : public CharacterController::Activity {
+struct UseItem : public CharacterController::Activity 
+{
     DECL_ACTIVITY(UseItem)
 
     int itemslot;
     bool fired = false;
     float power = 0.f;
 
-    UseItem(int slot) : itemslot(slot) {
+    UseItem(int slot) : itemslot(slot) 
+    {
     }
 
     bool update(CharacterObject* character, CharacterController* controller) override;
